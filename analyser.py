@@ -1,8 +1,9 @@
 """
+Run this script in the Competition Output Root Directory (same directory as logs folder)
 Domain:
-	0 = Low (New_sporthal)
-	1 = Medium (Politics)
-	2 = High (WindFarm)
+	0 = (New_sporthal)
+	1 = (Politics)
+	2 = (WindFarm)
 
 Uncertainty:
 	0 = Low (1-2)
@@ -179,9 +180,9 @@ def getNashDistanceForTournament(index, reserve):
 	dists = []
 	for dist in getColumnForTournament(index, 10):
 		if not dist == "":
-			dists += [float(1-dist)]
+			dists += [float(dist)]
 		else:
-			dists += [float(0)]
+			dists += [float(reserve)]
 	return dists
 
 def getLowerAgentUtilityForTournament(index):
@@ -287,9 +288,33 @@ sportHalDist = getAvgNashDistanceForDomain(0, 0.2)
 politicsDist = getAvgNashDistanceForDomain(1, 0.8)
 windfarmDist = getAvgNashDistanceForDomain(2, 0.6)
 
+avgUtil = []
+avgDist = []
+for x in range(0, 38):
+	avgUtil.append((sportHalUtil[x]+politicsUtil[x]+windfarmUtil[x])/3)
+	avgDist.append((sportHalDist[x]+politicsDist[x]+windfarmDist[x])/3)
+
+
 with open("analysis.out.csv", "wb") as csvfile:
 		writer = csv.writer(csvfile, delimiter=',', quotechar='"')
 		writer.writerow(['SportHall'] + ['']*2 + ['Politics'] + ['']*2 + ['WindFarm'] + ['']*2)
-		writer.writerow(['Agent'] +['Avg Utility', 'Avg Nash Dist'] * 3)
+		writer.writerow(['Agent'] +['Avg Utility', 'Avg Nash Dist'] * 3 + ['Overall Avg Utility', 'Overall Avg Nash Dist', 'Max Utility', 'Min Utility', 'Max Dist', 'Min Dist', 'Utility Score', 'Dist Score', 'Overall Score'])
 		for x in range(0, 38):
-			writer.writerow([x+1, sportHalUtil[x], sportHalDist[x], politicsUtil[x], politicsDist[x], windfarmUtil[x], windfarmDist[x]])
+			writer.writerow([
+				x+1,
+				sportHalUtil[x],
+				sportHalDist[x],
+				politicsUtil[x],
+				politicsDist[x],
+				windfarmUtil[x],
+				windfarmDist[x],
+				avgUtil[x],
+				avgDist[x],
+				max(avgUtil), 
+				min(avgUtil),
+				max(avgDist),
+				min(avgDist),
+				(avgUtil[x] - min(avgUtil))/(max(avgUtil) - min(avgUtil)),
+				(max(avgDist)-avgDist[x])/(max(avgDist)-min(avgDist)),
+				((avgUtil[x] - min(avgUtil))/(max(avgUtil) - min(avgUtil)) + (max(avgDist)-avgDist[x])/(max(avgDist)-min(avgDist)))/2
+			])
